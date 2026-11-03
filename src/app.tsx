@@ -1,4 +1,5 @@
 import { Hono } from 'hono';
+import { readNight } from './digest/read.js';
 import { loadConfig, type RigConfig } from './config.js';
 import { lane } from './lane.js';
 import { readStatus } from './status.js';
@@ -17,6 +18,12 @@ export function createApp(config: RigConfig = loadConfig()) {
       </Layout>,
     ),
   );
+
+  app.get('/api/digest/:night', (c) => {
+    const night = c.req.param('night');
+    const data = /^\d{4}-\d{2}-\d{2}$/.test(night) ? readNight(config.runsDir, night) : null;
+    return data ? c.json(data) : c.json({ error: `no run log for ${night}` }, 404);
+  });
 
   return app;
 }
