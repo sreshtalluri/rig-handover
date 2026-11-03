@@ -24,6 +24,12 @@ describe('digest page', () => {
     expect(html).toContain('could not be read');
   });
 
+  it('marks 3+ retries and any fail, nothing else', async () => {
+    const html = await (await app.request('/digest/2026-10-28')).text();
+    const warned = [...html.matchAll(/<tr class="warn"><td>([^<]+)<\/td>/g)].map((m) => m[1]);
+    expect(warned).toEqual(['fixtures/refresh', 'notes/backup']);
+  });
+
   it('404s a night with no file', async () => {
     expect((await app.request('/digest/2026-10-31')).status).toBe(404);
   });
